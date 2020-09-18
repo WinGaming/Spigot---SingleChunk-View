@@ -1,0 +1,6 @@
+name: SingleChunk
+main: eu.spiforge.reddit.DisableJoinQuit
+version: 0.1.0
+author: SpiForge
+
+api-version: 1.16
