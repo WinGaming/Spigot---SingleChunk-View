@@ -86,20 +86,20 @@ public class DisableJoinQuit extends JavaPlugin implements Listener {
 	        	}
 	        	
 	        	if (chachedPacket != null) {
-	        		try {
-			        	Field fieldX = packet.getClass().getDeclaredField("a");
-			        	fieldX.setAccessible(true);
-			        	System.out.println(fieldX.getInt(chachedPacket));
-			        	fieldX.setAccessible(false);
-		        		
-			        	Field fieldZ = packet.getClass().getDeclaredField("b");
-			        	fieldZ.setAccessible(true);
-			        	System.out.println(fieldZ.getInt(chachedPacket));
-						fieldZ.setAccessible(false);
-					} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+//	        		try {
+//			        	Field fieldX = packet.getClass().getDeclaredField("a");
+//			        	fieldX.setAccessible(true);
+//			        	System.out.println(fieldX.getInt(chachedPacket));
+//			        	fieldX.setAccessible(false);
+//		        		
+//			        	Field fieldZ = packet.getClass().getDeclaredField("b");
+//			        	fieldZ.setAccessible(true);
+//			        	System.out.println(fieldZ.getInt(chachedPacket));
+//						fieldZ.setAccessible(false);
+//					} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
 	        		
 	        		return chachedPacket;
 	        	}
