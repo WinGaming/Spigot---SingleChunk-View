@@ -11,6 +11,7 @@ import net.minecraft.server.v1_16_R2.MinecraftServer;
 import net.minecraft.server.v1_16_R2.NetworkManager;
 import net.minecraft.server.v1_16_R2.Packet;
 import net.minecraft.server.v1_16_R2.PacketPlayOutBlockChange;
+import net.minecraft.server.v1_16_R2.PacketPlayOutLightUpdate;
 import net.minecraft.server.v1_16_R2.PacketPlayOutMapChunk;
 import net.minecraft.server.v1_16_R2.PlayerConnection;
 
@@ -67,6 +68,7 @@ public class CustomPlayerConnection extends PlayerConnection {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+		        	
 		        	System.out.println("sending extra update");
 		        	super.sendPacket(new PacketPlayOutMapChunk(((CraftChunk) this.player.getBukkitEntity().getLocation().getWorld().getChunkAt(this.player.chunkX, this.player.chunkZ)).getHandle(), 65535));
 		        }).start();;
