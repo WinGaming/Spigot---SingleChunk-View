@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.craftbukkit.v1_16_R2.CraftChunk;
 import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,6 +14,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import eu.spiforge.reddit.CustomPlayerConnection.PacketSendHandler;
+import net.minecraft.server.v1_16_R2.Chunk;
 import net.minecraft.server.v1_16_R2.PacketPlayOutMapChunk;
 import net.minecraft.server.v1_16_R2.PacketPlayOutUnloadChunk;
 
@@ -30,8 +32,6 @@ public class DisableJoinQuit extends JavaPlugin implements Listener {
 	
 	@EventHandler
 	public void onQuit(PlayerMoveEvent event) {
-
-		
 		int cX = event.getPlayer().getLocation().getChunk().getX();
 		int cZ = event.getPlayer().getLocation().getChunk().getZ();
 		
@@ -72,10 +72,7 @@ public class DisableJoinQuit extends JavaPlugin implements Listener {
 	        		cachedChunks.put(chunkX, new HashMap<>());
 	        	}
 	        	
-	        	if (!cachedChunks.get(chunkX).containsKey(chunkZ)) {
-	        		cachedChunks.get(chunkX).put(chunkZ, packet);
-	        	}
-	        	
+	        	cachedChunks.get(chunkX).put(chunkZ, packet);
 	        	
 	        	int playerChunkX = p.getLocation().getChunk().getX();
 	        	int playerChunkZ = p.getLocation().getChunk().getZ();
