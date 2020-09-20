@@ -1,6 +1,8 @@
 package eu.spiforge.reddit;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,9 +18,12 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import eu.spiforge.reddit.packet.AccessablePacketPlayOutMapChunk;
 import net.minecraft.server.v1_16_R2.ChunkProviderServer;
 import net.minecraft.server.v1_16_R2.EntityPlayer;
 import net.minecraft.server.v1_16_R2.LightEngineThreaded;
+import net.minecraft.server.v1_16_R2.NBTTagCompound;
+import net.minecraft.server.v1_16_R2.NBTTagLongArray;
 import net.minecraft.server.v1_16_R2.PacketPlayOutLightUpdate;
 import net.minecraft.server.v1_16_R2.PacketPlayOutMapChunk;
 import net.minecraft.server.v1_16_R2.PacketPlayOutUnloadChunk;
@@ -27,13 +32,9 @@ import net.minecraft.server.v1_16_R2.PlayerChunkMap;
 public class SingleChunkView extends JavaPlugin implements Listener {
 	
 	public static final boolean SEND_CUSTOM_LIGHT_UPDATE = true;
+	public static final boolean REPLACE_CHUNKS_WITH_EMPTY_CHUNK = false;
 	
 	private static Map<Integer, Map<Integer, PacketPlayOutMapChunk>> cachedChunks = new HashMap<>();
-	
-	@Override
-	public void onEnable() {
-		getServer().getPluginManager().registerEvents(this, this);
-	}
 	
 	private Map<Player, PosXZ> lastPositions = new HashMap<>();
 	
@@ -46,8 +47,17 @@ public class SingleChunkView extends JavaPlugin implements Listener {
 		}
 	}
 	
+	@Override
+	public void onEnable() {
+		getServer().getPluginManager().registerEvents(this, this);
+		
+		CommandChunk chunkCommand = new CommandChunk();
+		getCommand("chunk").setExecutor(chunkCommand);
+		getCommand("chunk").setTabCompleter(chunkCommand);
+	}
+	
 	@EventHandler
-	public void onQuit(PlayerMoveEvent event) {
+	public void onMove(PlayerMoveEvent event) {
 		int currentX = event.getPlayer().getLocation().getChunk().getX();
 		int currentZ = event.getPlayer().getLocation().getChunk().getZ();
 		
@@ -57,9 +67,40 @@ public class SingleChunkView extends JavaPlugin implements Listener {
 			Player player = event.getPlayer();
 			CraftPlayer craftPlayer = (CraftPlayer) player;
 			EntityPlayer nmsPlayer = craftPlayer.getHandle();
-			PacketPlayOutUnloadChunk unloadPacket = new PacketPlayOutUnloadChunk(oldChunk.x, oldChunk.z);
 			
+			PacketPlayOutUnloadChunk unloadPacket = new PacketPlayOutUnloadChunk(oldChunk.x, oldChunk.z);
 			nmsPlayer.playerConnection.sendPacket(unloadPacket);
+			
+			if (REPLACE_CHUNKS_WITH_EMPTY_CHUNK) {
+				int toReplaceX = oldChunk.x;
+				int toReplaceZ = oldChunk.z;
+				
+				int[] customBiomeArray = new int[1024];
+				for (int i = 0; i < customBiomeArray.length; i++) {
+					customBiomeArray[i] = 9;
+				}
+				
+				long[] customHeightMapArray = new long[37];
+				for (int i = 0; i < customHeightMapArray.length; i++) {
+					customHeightMapArray[i] = 0;
+				}
+				
+				NBTTagCompound customHeightMap = new NBTTagCompound();
+				NBTTagLongArray customMotionBlocking = new NBTTagLongArray(customHeightMapArray);
+				NBTTagLongArray customWorldSurface = new NBTTagLongArray(customHeightMapArray);
+				customHeightMap.set("MOTION_BLOCKING", customMotionBlocking);
+				customHeightMap.set("WORLD_SURFACE", customWorldSurface);
+				
+				AccessablePacketPlayOutMapChunk accessableEmptyChunkPacket = new AccessablePacketPlayOutMapChunk(0, toReplaceX, toReplaceZ, true, new ArrayList<NBTTagCompound>(), new byte[0], customBiomeArray, customHeightMap, true);
+				PacketPlayOutMapChunk emmptyChunkPacket = accessableEmptyChunkPacket.toNMSPacket();
+				Bukkit.getScheduler().runTaskLater(this, () -> {
+					nmsPlayer.playerConnection.sendPacket(emmptyChunkPacket);
+					
+					for (String a : new AccessablePacketPlayOutMapChunk(emmptyChunkPacket).compact()) {
+						player.sendMessage(a);
+					}
+				}, 3);
+			}
 			
 			if (SEND_CUSTOM_LIGHT_UPDATE) {
 				Bukkit.getScheduler().runTaskLater(this, () -> {

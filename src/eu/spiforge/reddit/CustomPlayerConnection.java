@@ -1,5 +1,9 @@
 package eu.spiforge.reddit;
 
+import static eu.spiforge.reddit.Utils.*;
+
+import java.util.Arrays;
+
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -41,9 +45,25 @@ public class CustomPlayerConnection extends PlayerConnection {
 				if (packet == null) {
 					return;
 				}
-
+				
+				final Packet cop = packet;
+				
 				Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-					super.sendPacket(new PacketPlayOutMapChunk(this.player.world.getChunkAt(this.player.chunkX, this.player.chunkZ), 65535));
+					PacketPlayOutMapChunk p = new PacketPlayOutMapChunk(this.player.world.getChunkAt(this.player.chunkX, this.player.chunkZ), 65535);
+					
+//					try {
+//						byte[] data = (byte[]) getValue(PacketPlayOutMapChunk.class, "f", p);
+//						for (int i = 0; i < data.length; i++) {
+//							if (data[i] == 0) {
+//								data[i] = 36;
+//							}
+//						}
+//						setValue(p, "f", data);
+//					} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+//						e.printStackTrace();
+//					}
+					
+					super.sendPacket(p);
 				}, 1);
 			}
 		}

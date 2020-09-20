@@ -4,3 +4,8 @@ version: 0.1.0
 author: SpiForge
 
 api-version: 1.16
+
+commands:
+  chunk:
+    usage: /<command>
+    description: Controlling chunks
